@@ -1,3 +1,12 @@
+# Function to handle Ctrl+C
+ctrl_c() {
+    echo ""
+    exit 1
+}
+
+# Trap Ctrl+C and call the ctrl_c function
+trap ctrl_c SIGINT
+
 while true; do
 	
     read -p "$(hostname)@$(whoami):~$ " input
