@@ -69,7 +69,7 @@ int main() {
         // Print a prompt
 	
 
-        printf("\033[1;36m%s@%s:~$ \033[0m", getHostnameOutput(), getWhoamiOutput());
+        printf("\033[1;36m%s\033[0m@\033[1;33m%s\033[0m:~$ ", getHostnameOutput(), getWhoamiOutput());
 
         // Read the command from the user
         fgets(command, MAX_COMMAND_LENGTH, stdin);
