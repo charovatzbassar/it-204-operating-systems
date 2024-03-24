@@ -32,9 +32,54 @@ char* getCommandOutput(char* command) {
 	return output;
 }
 
-void cat(char* args[]) {}
+void cat(char* args[]) {
+    int p = fork();
 
-void rm(char* args[]) {}
+    if (p < 0) {
+        perror("Fork failed");
+        exit(1);
+    } else if (p == 0) {
+        FILE *file;
+    	char* filename = args[1];
+    	char line[100];
+
+    	file = fopen(filename, "r");
+    	if (file == NULL) {
+            fprintf(stderr, "Error opening file %s\n", filename);
+            exit(1);
+    	}
+
+    	while (fgets(line, sizeof(line), file) != NULL) {
+            printf("%s", line);
+        }
+
+    	fclose(file);
+    } else {
+        wait(NULL);
+    }
+
+}
+
+void rm(char* args[]) {
+    int p = fork();
+
+    if (p < 0) {
+        perror("Fork failed");
+        exit(1);
+    } else if (p == 0) {
+        char* filename = args[1];
+
+    	if (remove(filename) == 0) {
+       	    printf("File %s removed successfully.\n", filename);
+        } else {
+       	    fprintf(stderr, "Error removing file %s\n", filename);
+	 }
+
+    } else {
+        wait(NULL);
+    }
+
+}
 
 void clear(char* args[]) {
     int p = fork();
@@ -51,7 +96,29 @@ void clear(char* args[]) {
 
 }
 
-void cowsay(char* args[]) {}
+void cowsay(char* args[]) {
+    int p = fork();
+
+    if (p < 0) {
+        perror("Fork failed");
+        exit(1);
+    } else if (p == 0) {
+      char* cowsayText = args[1];
+
+      printf("<%s>\n", cowsayText);
+      printf("        \\   ^__^\n");
+      printf("         \\  (oo)\\_______\n");
+      printf("            (__)\\       )\\/\\\n");
+      printf("                ||----w |\n");
+      printf("                ||     ||\n");
+
+
+
+    } else {
+        wait(NULL);
+    }
+
+}
 
 
 
@@ -61,7 +128,7 @@ int main() {
 
     while (1) {
 
-        printf("\033[1;36m%s\033[0m@\033[1;33m%s\033[0m:~$ ", getCommandOutput("hostname"), getCommandOutput("whoami"));
+        printf("\033[1;36m%s@%s\033[0m:\033[1;33m%s\033[0m$ ", getCommandOutput("hostname"), getCommandOutput("whoami"), getCommandOutput("pwd"));
 
         fgets(command, MAX_COMMAND_LENGTH, stdin);
 
@@ -80,13 +147,13 @@ int main() {
         if (strcmp(arguments[0], "exit") == 0) {
             break;
         } else if (strcmp(arguments[0], "cat") == 0) {
-		printf("Cat command\n");
+		cat(arguments);
 	} else if (strcmp(arguments[0], "clear") == 0) {
 		clear(arguments);
 	} else if (strcmp(arguments[0], "rm") == 0) {
-		printf("Rm command\n");
+		rm(arguments);
 	} else if (strcmp(arguments[0], "cowsay") == 0) {
-		printf("Cowsay command\n");
+		cowsay(arguments);
 	} else {
 		printf("Invalid input\n");
 	}
