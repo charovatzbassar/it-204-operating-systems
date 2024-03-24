@@ -73,10 +73,19 @@ int main() {
        
         if (strcmp(arguments[0], "exit") == 0) {
             break;
-        } 
+        } else if (strcmp(arguments[0], "cat") == 0) {
+		printf("Cat command\n");
+	} else if (strcmp(arguments[0], "clear") == 0) {
+		printf("Clear command\n");
+	} else if (strcmp(arguments[0], "rm") == 0) {
+		printf("Rm command\n");
+	} else if (strcmp(arguments[0], "cowsay") == 0) {
+		printf("Cowsay command\n");
+	} else {
+		printf("Invalid input\n");
+	}
 	
-       	executeCommand(arguments);
-	
+
 
     }
 
