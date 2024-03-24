@@ -32,20 +32,26 @@ char* getCommandOutput(char* command) {
 	return output;
 }
 
-void executeCommand(char *args[]) {
+void cat(char* args[]) {}
+
+void rm(char* args[]) {}
+
+void clear(char* args[]) {
     int p = fork();
+
     if (p < 0) {
-        fprintf(stderr, "Fork failed\n");
-        exit(1);
+    	perror("Fork failed");
+	exit(1);
     } else if (p == 0) {
-        if (execvp(args[0], args) < 0) {
-            fprintf(stderr, "Exec failed\n");
-            exit(1);
-        }
+    	printf("\033[2J");
+    	printf("\033[H");
     } else {
-        wait(NULL); 
+    	wait(NULL);
     }
+
 }
+
+void cowsay(char* args[]) {}
 
 
 
@@ -76,7 +82,7 @@ int main() {
         } else if (strcmp(arguments[0], "cat") == 0) {
 		printf("Cat command\n");
 	} else if (strcmp(arguments[0], "clear") == 0) {
-		printf("Clear command\n");
+		clear(arguments);
 	} else if (strcmp(arguments[0], "rm") == 0) {
 		printf("Rm command\n");
 	} else if (strcmp(arguments[0], "cowsay") == 0) {
