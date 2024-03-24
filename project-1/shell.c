@@ -43,19 +43,16 @@ void cat(char* args[]) {
     	char* filename = args[1];
     	char line[100];
 
-    	// Open the file
     	file = fopen(filename, "r");
     	if (file == NULL) {
             fprintf(stderr, "Error opening file %s\n", filename);
             exit(1);
     	}
 
-    	// Read and print each line
     	while (fgets(line, sizeof(line), file) != NULL) {
             printf("%s", line);
         }
 
-    	// Close the file
     	fclose(file);
     } else {
         wait(NULL);
@@ -70,7 +67,14 @@ void rm(char* args[]) {
         perror("Fork failed");
         exit(1);
     } else if (p == 0) {
-        
+        char* filename = args[1];
+
+    	if (remove(filename) == 0) {
+       	    printf("File %s removed successfully.\n", filename);
+        } else {
+       	    fprintf(stderr, "Error removing file %s\n", filename);
+	 }
+
     } else {
         wait(NULL);
     }
@@ -137,7 +141,7 @@ int main() {
 	} else if (strcmp(arguments[0], "clear") == 0) {
 		clear(arguments);
 	} else if (strcmp(arguments[0], "rm") == 0) {
-		printf("Rm command\n");
+		rm(arguments);
 	} else if (strcmp(arguments[0], "cowsay") == 0) {
 		printf("Cowsay command\n");
 	} else {
