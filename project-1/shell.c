@@ -121,7 +121,6 @@ void cowsay(char* args[]) {
 }
 
 
-
 int main() {
     char command[MAX_COMMAND_LENGTH];
     char *arguments[MAX_ARGUMENTS];
