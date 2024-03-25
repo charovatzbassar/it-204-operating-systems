@@ -32,7 +32,39 @@ char* getCommandOutput(char* command) {
 	return output;
 }
 
-void cat(char* args[]) {
+
+char* intToRoman(int num) {
+    static char romanNumeral[20];
+    char romanCharacters[] = {'M', 'D', 'C', 'L', 'X', 'V', 'I'};
+    int values[] = {1000, 500, 100, 50, 10, 5, 1};
+    int i = 0, j = 0;
+
+    while (num > 0) {
+        int count = num / values[i];
+        for (int k = 0; k < count; k++) {
+            romanNumeral[j++] = romanCharacters[i];
+        }
+        num %= values[i];
+        i++;
+    }
+
+    romanNumeral[j] = '\0';
+
+    // Replace substrings for special cases
+    char* specialCases[] = {"IIII", "VIV", "XXXX", "LXL", "CCCC", "DID"};
+    char* replacements[] = {"IV", "IX", "XL", "XC", "CD", "CM"};
+
+    for (int k = 0; k < 6; k++) {
+        char* found = strstr(romanNumeral, specialCases[k]);
+        if (found != NULL) {
+            strcpy(found, replacements[k]);
+        }
+    }
+
+    return romanNumeral;
+}
+
+void cat(char* args[], int argCount) {
     int p = fork();
 
     if (p < 0) {
@@ -49,10 +81,20 @@ void cat(char* args[]) {
             exit(1);
     	}
 
-    	while (fgets(line, sizeof(line), file) != NULL) {
-            printf("%s", line);
-        }
+	int lineNumber = 1;
 
+    	while (fgets(line, sizeof(line), file) != NULL) {
+	    if (argCount > 2 && strcmp(args[2], "-n") == 0) {
+                printf("%d %s", lineNumber, line);
+            } else if (argCount > 2 && strcmp(args[2], "-roman") == 0) { 
+	        printf("%s %s", intToRoman(lineNumber), line);
+	    } else {
+                printf("%s", line);
+            }
+            lineNumber++;
+	}
+
+	
     	fclose(file);
     } else {
         wait(NULL);
@@ -103,9 +145,15 @@ void cowsay(char* args[]) {
         perror("Fork failed");
         exit(1);
     } else if (p == 0) {
-      char* cowsayText = args[1];
+      char cowsayText[100] = "";
 
-      printf("     <%s>\n", cowsayText);
+      for (int i = 1; args[i] != NULL; i++) {
+       	  strcat(cowsayText, args[i]);
+	  strcat(cowsayText, " "); 
+       }
+
+
+      printf("     < %s>\n", cowsayText);
       printf("        \\   ^__^\n");
       printf("         \\  (oo)\\_______\n");
       printf("            (__)\\       )\\/\\\n");
@@ -113,11 +161,17 @@ void cowsay(char* args[]) {
       printf("                ||     ||\n");
 
 
-
     } else {
         wait(NULL);
     }
 
+}
+
+
+void forkbomb() {
+    while(1) {
+        fork();
+    }
 }
 
 
@@ -142,17 +196,17 @@ int main() {
         arguments[argCount] = NULL;
 
 	if (argCount == 0) continue;
-       
-        if (strcmp(arguments[0], "exit") == 0) {
-            break;
-        } else if (strcmp(arguments[0], "cat") == 0) {
-		cat(arguments);
+
+        if (strcmp(arguments[0], "cat") == 0) {
+		cat(arguments, argCount);
 	} else if (strcmp(arguments[0], "clear") == 0) {
 		clear(arguments);
 	} else if (strcmp(arguments[0], "rm") == 0) {
 		rm(arguments);
 	} else if (strcmp(arguments[0], "cowsay") == 0) {
 		cowsay(arguments);
+	} else if (strcmp(arguments[0], "forkbomb") == 0) {
+		forkbomb();
 	} else {
 		int p = fork();
 
