@@ -40,6 +40,25 @@ Task 1.5:
 
 -Instructions for compiling our programs/scripts:
 
+    To run compile our programm, firstly open terminal, locate the file using "ls" comand and selecting the
+    file using the "cd" command, then type:
+        gcc -Wall -o shell shell.c
+    After that command, enter:
+        ./shell
+
+    You should be able to control the shell programm now. 
+    There are few commands that you can use, such as:
+        1. rm
+        2. cat
+        3. clear
+        4. cowsay
+        5. In ex. fork, wait and exec
+        6. In ex. kill, execv
+        7. In ex. forkbomb
+
+    Some collors have benn added to our shell and were named accordingly.
+    
+
 -Challenges we have encountered along the way:
 
 -Sources/tutorials that we have used:
