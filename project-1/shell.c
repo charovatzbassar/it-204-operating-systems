@@ -105,7 +105,7 @@ void cowsay(char* args[]) {
     } else if (p == 0) {
       char* cowsayText = args[1];
 
-      printf("<%s>\n", cowsayText);
+      printf("     <%s>\n", cowsayText);
       printf("        \\   ^__^\n");
       printf("         \\  (oo)\\_______\n");
       printf("            (__)\\       )\\/\\\n");
@@ -155,7 +155,18 @@ int main() {
 	} else if (strcmp(arguments[0], "cowsay") == 0) {
 		cowsay(arguments);
 	} else {
-		printf("Invalid input\n");
+		int p = fork();
+
+		if (p < 0) {
+		    perror("fork");
+		    exit(1);
+		} else if (p == 0) {
+		    execvp(arguments[0], arguments);
+		    perror("execvp");
+		    exit(1);
+		} else {
+		    wait(NULL);
+		}
 	}
 	
 
