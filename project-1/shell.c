@@ -64,6 +64,15 @@ char* intToRoman(int num) {
     return romanNumeral;
 }
 
+int isInArray(char *target, char **array, int size) {
+    for (int i = 0; i < size; i++) {
+        if (strcmp(target, array[i]) == 0) {
+            return i; // String found in array
+        }
+    }
+    return -1; // String not found in array
+}
+
 void cat(char* args[], int argCount) {
     int p = fork();
 
@@ -71,6 +80,11 @@ void cat(char* args[], int argCount) {
         perror("Fork failed");
         exit(1);
     } else if (p == 0) {
+	if (args[1] == NULL) {
+	    printf("Usage: cat <filename> <flag>\n");
+	    exit(1);
+	}
+
         FILE *file;
     	char* filename = args[1];
     	char line[100];
@@ -81,21 +95,44 @@ void cat(char* args[], int argCount) {
             exit(1);
     	}
 
+	FILE* output_file = NULL;
+
+	int redirectIndex = isInArray(">", args, argCount);
+
+	if (redirectIndex > 0) {
+		output_file = fopen(args[redirectIndex+1], "w");
+		if (output_file == NULL) {
+    			perror("Failed to open output file");
+    			exit(1);
+		}
+	}
+
 	int lineNumber = 1;
 
     	while (fgets(line, sizeof(line), file) != NULL) {
 	    if (argCount > 2 && strcmp(args[2], "-n") == 0) {
                 printf("%d %s", lineNumber, line);
+		if (redirectIndex > 0) {
+		    fprintf(output_file, "%d %s", lineNumber, line);
+		}
             } else if (argCount > 2 && strcmp(args[2], "-roman") == 0) { 
-	        printf("%s %s", intToRoman(lineNumber), line);
+	        if (redirectIndex > 0) {
+			fprintf(output_file, "%s %s", intToRoman(lineNumber), line);
+		}
+		printf("%s %s", intToRoman(lineNumber), line);
+
 	    } else {
-                printf("%s", line);
+                if (redirectIndex > 0) {
+		    fprintf(output_file, "%s", line);
+		}
+		printf("%s", line);
             }
             lineNumber++;
 	}
 
 	
     	fclose(file);
+	fclose(output_file);
     } else {
         wait(NULL);
     }
@@ -138,7 +175,7 @@ void clear(char* args[]) {
 
 }
 
-void cowsay(char* args[]) {
+void cowsay(char* args[], int argCount) {
     int p = fork();
 
     if (p < 0) {
@@ -147,11 +184,35 @@ void cowsay(char* args[]) {
     } else if (p == 0) {
       char cowsayText[100] = "";
 
-      for (int i = 1; args[i] != NULL; i++) {
+      	FILE* output_file = NULL;
+        int redirectIndex = isInArray(">", args, argCount);
+
+        if (redirectIndex > 0) {
+                output_file = fopen(args[redirectIndex+1], "w");
+                if (output_file == NULL) {
+                        perror("Failed to open output file");
+                        exit(1);
+                }
+        }
+
+	int endPoint = redirectIndex > 0 ? redirectIndex : argCount;
+
+
+      for (int i = 1; i < endPoint; i++) {
        	  strcat(cowsayText, args[i]);
 	  strcat(cowsayText, " "); 
        }
 
+if (redirectIndex > 0) {
+      fprintf(output_file, "     < %s>\n", cowsayText);
+      fprintf(output_file, "        \\   ^__^\n");
+      fprintf(output_file, "         \\  (oo)\\_______\n");
+      fprintf(output_file, "            (__)\\       )\\/\\\n");
+      fprintf(output_file, "                ||----w |\n");
+      fprintf(output_file, "                ||     ||\n");
+
+      fclose(output_file);
+}
 
       printf("     < %s>\n", cowsayText);
       printf("        \\   ^__^\n");
@@ -159,7 +220,6 @@ void cowsay(char* args[]) {
       printf("            (__)\\       )\\/\\\n");
       printf("                ||----w |\n");
       printf("                ||     ||\n");
-
 
     } else {
         wait(NULL);
@@ -204,7 +264,7 @@ int main() {
 	} else if (strcmp(arguments[0], "rm") == 0) {
 		rm(arguments);
 	} else if (strcmp(arguments[0], "cowsay") == 0) {
-		cowsay(arguments);
+		cowsay(arguments, argCount);
 	} else if (strcmp(arguments[0], "forkbomb") == 0) {
 		forkbomb();
 	} else {
