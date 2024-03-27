@@ -33,6 +33,8 @@ char* getCommandOutput(char* command) {
 }
 
 
+
+
 char* intToRoman(int num) {
     static char romanNumeral[20];
     char romanCharacters[] = {'M', 'D', 'C', 'L', 'X', 'V', 'I'};
@@ -73,6 +75,22 @@ int isInArray(char *target, char **array, int size) {
     return -1; // String not found in array
 }
 
+
+char** sliceArray(char* arr[], int start, int end) {
+    int length = end - start + 1;
+    char** sliced_arr = (char**)malloc(length * sizeof(char*));
+    if (!sliced_arr) {
+        perror("Memory allocation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = start; i <= end; i++) {
+        sliced_arr[i - start] = arr[i];
+    }
+
+    return sliced_arr;
+}
+
 void cat(char* args[], int argCount) {
     int p = fork();
 
@@ -80,20 +98,22 @@ void cat(char* args[], int argCount) {
         perror("Fork failed");
         exit(1);
     } else if (p == 0) {
-	if (args[1] == NULL) {
-	    printf("Usage: cat <filename> <flag>\n");
-	    exit(1);
-	}
 
         FILE *file;
-    	char* filename = args[1];
+    	char* filename;
     	char line[100];
 
-    	file = fopen(filename, "r");
-    	if (file == NULL) {
-            fprintf(stderr, "Error opening file %s\n", filename);
-            exit(1);
-    	}
+	if (args[1] == NULL) {
+		file = stdin;
+	} else {
+		filename = args[1];
+    		file = fopen(filename, "r");
+    		if (file == NULL) {
+            		fprintf(stderr, "Error opening file %s\n", filename);
+            		exit(1);
+    		}
+
+	}
 
 	FILE* output_file = NULL;
 
@@ -131,8 +151,12 @@ void cat(char* args[], int argCount) {
 	}
 
 	
-    	fclose(file);
-	fclose(output_file);
+    	if (file != stdin) {
+            fclose(file);
+        } 
+        if (output_file != NULL) {
+            fclose(output_file);
+        }
     } else {
         wait(NULL);
     }
@@ -167,8 +191,7 @@ void clear(char* args[]) {
     	perror("Fork failed");
 	exit(1);
     } else if (p == 0) {
-    	printf("\033[2J");
-    	printf("\033[H");
+    	system("clear");
     } else {
     	wait(NULL);
     }
@@ -234,10 +257,83 @@ void forkbomb() {
     }
 }
 
+void prepareCommand(char command[]) {
+     char *arguments[MAX_ARGUMENTS];
+
+     char *token = strtok(command, " ");
+     int argCount = 0;
+     while (token != NULL && argCount < MAX_ARGUMENTS - 1) {
+            arguments[argCount++] = token;
+            token = strtok(NULL, " ");
+     }
+     arguments[argCount] = NULL;
+
+
+
+    executeCommand(arguments, argCount);
+
+}
+
+void executeCommand(char* arguments[], int argCount) {
+	if (argCount == 0) return;
+	
+	int pipeSymbolLocation = isInArray("|", arguments, argCount);	
+
+	if (pipeSymbolLocation > 0) {
+		char command1[100] = "";
+		char command2[100] = "";
+
+	for (int i = 0; i < pipeSymbolLocation; i++) {
+          strcat(command1, arguments[i]);
+          strcat(command1, " ");
+       }
+
+	for (int i = pipeSymbolLocation + 1; i < argCount; i++) {
+          strcat(command2, arguments[i]);
+          strcat(command2, " ");
+       }
+
+	prepareCommand(command1);
+	prepareCommand(command2);
+
+
+
+	} else {
+		
+        if (strcmp(arguments[0], "cat") == 0) {
+                cat(arguments, argCount);
+        } else if (strcmp(arguments[0], "clear") == 0) {
+                clear(arguments);
+        } else if (strcmp(arguments[0], "rm") == 0) {
+                rm(arguments);
+        } else if (strcmp(arguments[0], "cowsay") == 0) {
+                cowsay(arguments, argCount);
+        } else if (strcmp(arguments[0], "forkbomb") == 0) {
+                forkbomb();
+        } else {
+                int p = fork();
+
+                if (p < 0) {
+                    perror("fork");
+                    exit(1);
+                } else if (p == 0) {
+                    execvp(arguments[0], arguments);
+                    perror("execvp");
+                    exit(1);
+                } else {
+                    wait(NULL);
+                }
+        }
+	}
+     
+}
+
+
+
 
 int main() {
     char command[MAX_COMMAND_LENGTH];
-    char *arguments[MAX_ARGUMENTS];
+   
 
     while (1) {
 
@@ -247,40 +343,11 @@ int main() {
 
         command[strcspn(command, "\n")] = '\0';
 
-        char *token = strtok(command, " ");
-        int argCount = 0;
-        while (token != NULL && argCount < MAX_ARGUMENTS - 1) {
-            arguments[argCount++] = token;
-            token = strtok(NULL, " ");
-        }
-        arguments[argCount] = NULL;
 
-	if (argCount == 0) continue;
+        prepareCommand(command);
+	
 
-        if (strcmp(arguments[0], "cat") == 0) {
-		cat(arguments, argCount);
-	} else if (strcmp(arguments[0], "clear") == 0) {
-		clear(arguments);
-	} else if (strcmp(arguments[0], "rm") == 0) {
-		rm(arguments);
-	} else if (strcmp(arguments[0], "cowsay") == 0) {
-		cowsay(arguments, argCount);
-	} else if (strcmp(arguments[0], "forkbomb") == 0) {
-		forkbomb();
-	} else {
-		int p = fork();
-
-		if (p < 0) {
-		    perror("fork");
-		    exit(1);
-		} else if (p == 0) {
-		    execvp(arguments[0], arguments);
-		    perror("execvp");
-		    exit(1);
-		} else {
-		    wait(NULL);
-		}
-	}
+        
 	
 
 
