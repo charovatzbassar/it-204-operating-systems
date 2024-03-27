@@ -10,13 +10,17 @@
 #define MAX_ARGUMENTS 10
 #define MAX_BUFFER_SIZE 256
 
+// Utility methods to simplify code
+
 char* getCommandOutput(char* command) {
+	// Creates a pipe for standard output
 	FILE* pipe = popen(command, "r");
 	if (!pipe) {
 		perror("popen");
 		exit(EXIT_FAILURE);
 	}
 
+	// Allocates memory space for the output
 	char* output = (char*)malloc(MAX_BUFFER_SIZE * sizeof(char));
 	if (!fgets(output, MAX_BUFFER_SIZE, pipe)) {
 		perror("fgets");
@@ -27,7 +31,7 @@ char* getCommandOutput(char* command) {
 
 	size_t len = strlen(output);
 	if (len > 0 && output[len - 1] == '\n') {
-		output[len - 1] = '\0';
+		output[len - 1] = '\0'; // Removes the newline character
 	}
 
 	return output;
@@ -77,20 +81,7 @@ int isInArray(char *target, char **array, int size) {
 }
 
 
-char** sliceArray(char* arr[], int start, int end) {
-    int length = end - start + 1;
-    char** sliced_arr = (char**)malloc(length * sizeof(char*));
-    if (!sliced_arr) {
-        perror("Memory allocation failed");
-        exit(EXIT_FAILURE);
-    }
-
-    for (int i = start; i <= end; i++) {
-        sliced_arr[i - start] = arr[i];
-    }
-
-    return sliced_arr;
-}
+// When each command is executed, a process will be forked for it
 
 void cat(char* args[], int argCount) {
     int p = fork();
@@ -104,6 +95,7 @@ void cat(char* args[], int argCount) {
     	char* filename;
     	char line[100];
 
+	// If no arguments are specified, we will have a behaviour like with the real cat command; it will output everything a user types in
 	if (args[1] == NULL) {
 		file = stdin;
 	} else {
@@ -120,6 +112,7 @@ void cat(char* args[], int argCount) {
 
 	int redirectIndex = isInArray(">", args, argCount);
 
+	// If output is redirected, output file will be opened
 	if (redirectIndex > 0) {
 		output_file = fopen(args[redirectIndex+1], "w");
 		if (output_file == NULL) {
@@ -129,6 +122,7 @@ void cat(char* args[], int argCount) {
 	}
 
 	int lineNumber = 1;
+
 
     	while (fgets(line, sizeof(line), file) != NULL) {
 	    if (argCount > 2 && strcmp(args[2], "-n") == 0) {
@@ -219,6 +213,7 @@ void cowsay(char* args[], int argCount) {
                 }
         }
 
+	// This is used for determining where to end reading the output
 	int endPoint = redirectIndex > 0 ? redirectIndex : argCount;
 
 
@@ -252,9 +247,12 @@ if (redirectIndex > 0) {
 }
 
 
+// We have also implemented the forkbomb inside of the shell
 void forkbomb() {
     while(1) {
-        fork();
+        int p = fork();
+
+	printf("%d", p);
     }
 }
 
@@ -340,6 +338,7 @@ void draw(char* args[]) {
 void prepareCommand(char command[]) {
      char *arguments[MAX_ARGUMENTS];
 
+     // Tokenise input into arguments
      char *token = strtok(command, " ");
      int argCount = 0;
      while (token != NULL && argCount < MAX_ARGUMENTS - 1) {
@@ -349,15 +348,15 @@ void prepareCommand(char command[]) {
      arguments[argCount] = NULL;
 
 
-
+	// Execute the tokenised command
     executeCommand(arguments, argCount);
 
 }
 
 void executeCommand(char* arguments[], int argCount) {
-	if (argCount == 0) return;
+	if (argCount == 0) return; // do nothing if nothing is typed in
 	
-	int pipeSymbolLocation = isInArray("|", arguments, argCount);	
+	int pipeSymbolLocation = isInArray("|", arguments, argCount); // check for pipe symbol, if not, execute the command as usual	
 
 	if (pipeSymbolLocation > 0) {
 		char command1[100] = "";
@@ -373,13 +372,14 @@ void executeCommand(char* arguments[], int argCount) {
           strcat(command2, " ");
        }
 
+	// Execution of commands recursively
 	prepareCommand(command1);
 	prepareCommand(command2);
 
 
 
 	} else {
-		
+		// Check for our commands first, then execute if it is not specified in this shell
         if (strcmp(arguments[0], "cat") == 0) {
                 cat(arguments, argCount);
         } else if (strcmp(arguments[0], "clear") == 0) {
@@ -415,8 +415,10 @@ void executeCommand(char* arguments[], int argCount) {
 
 
 int main() {
-	system("clear");
+    system("clear");
     char command[MAX_COMMAND_LENGTH];
+
+    // The name of our shell (compound of our first names)
     printf("  .g8\"\"8q. `7MM\"\"\"Mq.  `7MM\"\"\"Yp,      db      `YMM'   `MP' \n");
     printf(".dP'    `YM. MM   `MM.   MM    Yb     ;MM:       VMb.  ,P   \n");
     printf("dM'      `MM MM   ,M9    MM    dP    ,V^MM.       `MM.M'    \n");
@@ -426,15 +428,18 @@ int main() {
     printf("  `\"bmmd\"' .JMML. .JMM..JMMmmmd9 .AMA.   .AMMA..MM:.  .:MMa.\n");
 
     while (1) {
-
+	
+	// The prompt is outputted here. The getCommandOutput method returns the standard output of the passed command
         printf("\033[1;36m%s@%s\033[0m:\033[1;33m%s\033[0m$ ", getCommandOutput("whoami"), getCommandOutput("hostname"), getCommandOutput("pwd"));
 
+        // This line reads input from the user
         fgets(command, MAX_COMMAND_LENGTH, stdin);
 
+	// Removes trailing newline character
         command[strcspn(command, "\n")] = '\0';
 
 
-
+	// In this method, the command is being tokenised, and executed
         prepareCommand(command);
 	
 	
