@@ -414,7 +414,6 @@ void executeCommand(char* arguments[], int argCount) {
 
 
 
-
 int main() {
 	system("clear");
     char command[MAX_COMMAND_LENGTH];
@@ -435,10 +434,9 @@ int main() {
         command[strcspn(command, "\n")] = '\0';
 
 
+
         prepareCommand(command);
 	
-
-        
 	
 
 
