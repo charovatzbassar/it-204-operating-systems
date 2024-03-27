@@ -26,16 +26,6 @@ void execute_command(char *command[]) {
         // Parent process
         printf("Parent process waiting for child to complete...\n");
 
-        // Wait for 5 seconds
-        sleep(5);
-
-        // Send SIGTERM signal to the child process
-        printf("Sending SIGTERM signal to the child process...\n");
-        if (kill(pid, SIGTERM) == -1) {
-            perror("Kill failed");
-            exit(EXIT_FAILURE);
-        }
-
         // Wait for child process to complete
         int status;
         waitpid(pid, &status, 0);
@@ -44,6 +34,13 @@ void execute_command(char *command[]) {
             printf("Child process exited with status %d\n", WEXITSTATUS(status));
         } else {
             printf("Child process terminated abnormally\n");
+        }
+
+        // Send SIGKILL signal to the child process
+        printf("Sending SIGKILL signal to the child process...\n");
+        if (kill(pid, SIGKILL) == -1) {
+            perror("Kill failed");
+            exit(EXIT_FAILURE);
         }
     }
 }
