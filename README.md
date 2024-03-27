@@ -17,5 +17,3 @@ This repository keeps track of projects from the course.
         1.1.6. task13basic.
         1.1.7. task13forkbomb.c
         1.1.8. task13intermediate.c
-
-
