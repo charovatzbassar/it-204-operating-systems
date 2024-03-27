@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <fcntl.h>
+#include <time.h>
 
 #define MAX_COMMAND_LENGTH 100
 #define MAX_ARGUMENTS 10
@@ -257,6 +258,85 @@ void forkbomb() {
     }
 }
 
+void magic8() {
+    int p = fork();
+
+    if (p < 0) {
+        perror("Fork failed");
+        exit(1);
+    } else if (p == 0) {
+        char* fortunes[16] = {
+    "Yes, definitely.",
+    "Without a doubt.",
+    "You may rely on it.",
+    "Most likely.",
+    "Outlook good.",
+    "Signs point to yes.",
+    "Reply hazy, try again.",
+    "Ask again later.",
+    "Better not tell you now.",
+    "Cannot predict now.",
+    "Concentrate and ask again.",
+    "Don't count on it.",
+    "My reply is no.",
+    "My sources say no.",
+    "Outlook not so good.",
+    "Very doubtful."
+};
+	
+srand(time(NULL));
+
+char* fortune = fortunes[rand() % 16];
+
+    printf(" .-\"\"\"-.\n");
+    printf("/   _   \\\n");
+    printf("|  (8)  |\n");
+    printf("\\   ^   /\n");
+    printf(" '-...-'\n");
+
+    printf("Your fortune is: %s\n", fortune);
+	
+
+	
+    } else {
+        wait(NULL);
+    }
+
+}
+
+void draw(char* args[]) {
+   int p = fork();
+
+    if (p < 0) {
+        perror("Fork failed");
+        exit(1);
+    } else if (p == 0) {
+
+	 if (args[1] == NULL) {
+	 	printf("Usage: draw <no. of cards>\n");
+		exit(1);
+	 }
+
+        int numOfCards = atoi(args[1]);
+
+	char* values[13] = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+	char* suits[4] = {"♠", "♥", "♣", "♦"};
+
+	srand(time(NULL));
+
+	for (int i = 1; i <= numOfCards; i++) {
+	    char* value = values[rand() % 16];
+	    char* suit = suits[rand() % 4];
+
+	    printf("Card %d: %s%s\n", i, value, suit);
+	}
+
+    } else {
+        wait(NULL);
+    }
+
+}
+
 void prepareCommand(char command[]) {
      char *arguments[MAX_ARGUMENTS];
 
@@ -310,7 +390,11 @@ void executeCommand(char* arguments[], int argCount) {
                 cowsay(arguments, argCount);
         } else if (strcmp(arguments[0], "forkbomb") == 0) {
                 forkbomb();
-        } else {
+        } else if (strcmp(arguments[0], "magic8") == 0) {
+		magic8();
+	} else if (strcmp(arguments[0], "draw") == 0) {
+		draw(arguments);
+	} else {
                 int p = fork();
 
                 if (p < 0) {
@@ -332,12 +416,19 @@ void executeCommand(char* arguments[], int argCount) {
 
 
 int main() {
+	system("clear");
     char command[MAX_COMMAND_LENGTH];
-   
+    printf("  .g8\"\"8q. `7MM\"\"\"Mq.  `7MM\"\"\"Yp,      db      `YMM'   `MP' \n");
+    printf(".dP'    `YM. MM   `MM.   MM    Yb     ;MM:       VMb.  ,P   \n");
+    printf("dM'      `MM MM   ,M9    MM    dP    ,V^MM.       `MM.M'    \n");
+    printf("MM        MM MMmmdM9     MM\"\"\"bg.   ,M  `MM         MMb     \n");
+    printf("MM.      ,MP MM  YM.     MM    `Y   AbmmmqMA      ,M'`Mb.   \n");
+    printf("`Mb.    ,dP' MM   `Mb.   MM    ,9  A'     VML    ,P   `MM.  \n");
+    printf("  `\"bmmd\"' .JMML. .JMM..JMMmmmd9 .AMA.   .AMMA..MM:.  .:MMa.\n");
 
     while (1) {
 
-        printf("\033[1;36m%s@%s\033[0m:\033[1;33m%s\033[0m$ ", getCommandOutput("hostname"), getCommandOutput("whoami"), getCommandOutput("pwd"));
+        printf("\033[1;36m%s@%s\033[0m:\033[1;33m%s\033[0m$ ", getCommandOutput("whoami"), getCommandOutput("hostname"), getCommandOutput("pwd"));
 
         fgets(command, MAX_COMMAND_LENGTH, stdin);
 
