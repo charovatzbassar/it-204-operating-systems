@@ -7,21 +7,22 @@ This repository keeps track of projects from the course.
 2. Orhan Huseinbegovic
 
 -List of all files/directories:
-1. it-204-operating-systems
-    1.1. PROJECT-1
-        1.1.1. basic
-        1.1.2. forkbomb
-        1.1.3. intermediate
-        1.1.4. shell
-        1.1.5. shellc.
-        1.1.6. task13basic.
-        1.1.7. task13forkbomb.c
-        1.1.8. task13intermediate.c
-    1.2. README.md    
+    1. it-204-operating-systems
+        1.1. PROJECT-1
+            1.1.1. basic
+            1.1.2. forkbomb
+            1.1.3. intermediate
+            1.1.4. shell
+            1.1.5. shellc.
+            1.1.6. task13basic.
+            1.1.7. task13forkbomb.c
+            1.1.8. task13intermediate.c
+        1.2. README.md    
 
 -Answers to the questions in the assignment:
 
-Task 1.5:
+    Task 1.5:
+
     Question 1.5.1: What does the mmap() function do?
 
     Answer: In Linux, the mmap() function is commonly used for memory mapping files or devices into the virtual memory address space of a process. It provides a flexible and efficient way to work with large files, shared memory, and memory-mapped I/O.
@@ -47,6 +48,7 @@ Task 1.5:
 -Outline of what we did for the assignment:
 
     Purpose of our project was to familiarize us with the mechanics of process control through the implementation of a shell user interface. Also, this includes relationship between child and parent processes, steps needed to create a new process, shell variables and an introduction to user-input parsing and verification.
+    In 1.1. We have made a basic shell program that continually asks for user input, and does something on user's behalf, resets itself and again asks for user input. It is robust and supports execution of other programs and a series of built-in functions.
     In 1.2. We have implemented basic functionalities such as rm, cat, clear, cowsay. We were working on piping also.
     In 1.3. we have made examples of fork, wait, exec, kill commands, along with forkbomb example which we highly reccomend you not to try it!
     In 1.4. we have added some colors to our shell programm and we have named them accordingly.
@@ -67,6 +69,8 @@ Task 1.5:
         2. cat
         3. clear
         4. cowsay
+        5. forkbomb (implemented in this shell.c but also in a seperate file listed below for demonstrational purposes)
+        6. magic8 (story behind this function is that the magic ball will tell you your fortune or will give you a advice, it is really funny)
     
     In addition to those tasks, in seperate c files have been added examples of:
         1. fork, wait and exec
